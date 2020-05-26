@@ -1,26 +1,55 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import { connect } from "react-redux";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import LoadTopics from "./components/LoadTopics.js";
+import Menu from "./components/Menu.js";
+import Game from  "./components/Game.js";
+
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
+    componentDidMount() {
+    }
+
+    render() {
+        return (
+            <div>
+            <link
+              rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+              integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+              crossOrigin="anonymous"
+            />
+            {/*<button onClick={() => this.props.debug()}>DEBUG</button>*/}
+            {this.props.db_updated ?
+                <>
+                {this.props.session.key && this.props.session.db_id ?
+                    <Game/>
+                :
+                    <Menu/>
+                }
+                </>
+            :
+                <LoadTopics/>
+            }
+            </div>
+        );
+    }
 }
 
-export default App;
+const mapStateToProps = state => ({
+    db_updated: state.db_updated,
+    session: state.session,
+});
+
+const mapDispatchToProps = dispatch => ({
+    debug: () => dispatch({
+        type: "dump_store",
+        payload: null
+    }),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
