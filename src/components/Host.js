@@ -9,7 +9,7 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 
-const VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ98765432"
+const VALID_CHARS = "ABCDEFGHJKLMNOPQRSTUVWXYZ98765432"
 
 class Host extends Component {
     constructor(props) {

@@ -123,6 +123,8 @@ class Game extends Component {
                                     "round.board": board,
                                     "round.guesses": Array(25).fill(""),
                                     turn: (this.props.round.id % 2) ? "B" : "R",
+                                    guesses: 0,
+                                    score: {red: 0, blue: 0},
                                 })
                             }}>Start Game</Button>
                         </Col>
@@ -150,14 +152,6 @@ class Game extends Component {
                 if (this.props.players[0] === this.props.player_name) {
                     //HOST ONLY
                     return (<Row>
-                        <Col>
-                            <Button onClick={() => {
-                                //Next Round
-                                firestore.collection("sessions").doc(this.props.session.db_id).update({
-                                    stage: "voting"
-                                })
-                            }}>To Voting</Button>
-                        </Col>
                         <Col>
                             <Button onClick={() => {
                                 firestore.collection("sessions").doc(this.props.session.db_id).update({
@@ -219,14 +213,15 @@ class Game extends Component {
     }
 
     game() {
-        let hints = []
-        let counter = -1;
-        hints.push(<Row key={"players"}>
+        let game = []
+        game.push(<Row key={"you"}>
             <Col>
-                <Alert variant="info">{this.props.guesses === 0 ? (this.props.turn==="R" ? "Red":"Blue")+" Codemaster is giving a hint." : (this.props.turn==="R" ? "Red":"Blue")+" team is making guesses."}</Alert>
+                <Alert variant={this.props.player_team === "red" ? "danger" : "primary"}>
+                    {(((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) ? "Codemaster " : "Agent ") + this.props.player_name}
+                </Alert>
             </Col>
         </Row>);
-        hints.push(<Row key="board+role">
+        game.push(<Row key="board+role">
             <Col>
                 <Table bordered>
                     <tbody>
@@ -235,13 +230,30 @@ class Game extends Component {
                 </Table>
             </Col>
         </Row>)
-        return hints;
+        game.push(<Row key={"players"}>
+            <Col>
+                <Alert variant="info">{this.props.guesses === 0 ? (this.props.turn==="R" ? "Red":"Blue")+" Codemaster is giving a hint." : (this.props.turn==="R" ? "Red":"Blue")+" team is making guesses."}</Alert>
+            </Col>
+        </Row>);
+        if (this.props.guesses === 0 && (this.props.turn==="R" ? "red":"blue") === this.props.player_team) {
+            game.push(<Row key={"guesses"}>
+                {(this.props.turn === "R") ? <Col>
+                    <Button variant="secondary">1</Button>
+                </Col>
+                : null}
+                {true ? <Col>
+                    <Button variant="secondary">2</Button>
+                </Col>
+                : null}
+            </Row>);
+        }
+        return game;
     }
 
     genBoard() {
         let rows = []
         //if codemaster
-        if (this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) {
+        if ((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) {
             for (let r in [0,1,2,3,4]) {
                 let row = <tr key={"r"+r}>
                     {[0,1,2,3,4].map((c) => {
