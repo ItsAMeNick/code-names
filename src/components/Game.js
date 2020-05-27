@@ -279,32 +279,32 @@ class Game extends Component {
                             <Button variant="secondary">4</Button>
                         </Col>
                     : null}
-                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 6 : 4)))
-                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 6 : 4)))) ?
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 5 : 4)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 5 : 4)))) ?
                         <Col>
                             <Button variant="secondary">5</Button>
                         </Col>
                     : null}
-                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 5 : 3)))
-                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 5 : 3)))) ?
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 4 : 3)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 4 : 3)))) ?
                         <Col>
                             <Button variant="secondary">6</Button>
                         </Col>
                     : null}
-                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 4 : 2)))
-                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 4 : 2)))) ?
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 3 : 2)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 3 : 2)))) ?
                         <Col>
                             <Button variant="secondary">7</Button>
                         </Col>
                     : null}
-                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 3 : 1)))
-                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 3 : 1)))) ?
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 2 : 1)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 2 : 1)))) ?
                         <Col>
                             <Button variant="secondary">8</Button>
                         </Col>
                     : null}
-                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 2 : 0)))
-                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 2 : 0)))) ?
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 1 : 0)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 1 : 0)))) ?
                         <Col>
                             <Button variant="secondary">9</Button>
                         </Col>
