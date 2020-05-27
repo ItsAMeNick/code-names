@@ -24,6 +24,7 @@ class App extends Component {
               crossOrigin="anonymous"
             />
             <button onClick={() => this.props.debug()}>DEBUG</button>
+            {/*<button onClick={() => this.props.load()}>Load Words</button>*/}
             {this.props.db_updated ?
                 <>
                 {this.props.session.key && this.props.session.db_id ?
@@ -48,6 +49,10 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     debug: () => dispatch({
         type: "dump_store",
+        payload: null
+    }),
+    load: () => dispatch({
+        type: "load_wordlist",
         payload: null
     }),
 });

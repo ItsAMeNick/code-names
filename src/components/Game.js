@@ -21,6 +21,32 @@ function titleCase(string) {
     return sentence.join(" ");
 }
 
+const BASIC_CARD = {
+    background: "white",
+    textAlign: "center"
+}
+
+const CIV_CARD = {
+    background: "#ffeecc",
+    textAlign: "center"
+}
+
+const BLACK_CARD = {
+    background: "black",
+    color: "white",
+    textAlign: "center"
+}
+
+const RED_CARD = {
+    background: "#ffb3b3",
+    textAlign: "center"
+}
+
+const BLUE_CARD = {
+    background: "#99c2ff",
+    textAlign: "center"
+}
+
 class Game extends Component {
     constructor(props) {
         super(props);
@@ -35,8 +61,8 @@ class Game extends Component {
                 if (doc.exists) {
                     this.props.updateGame(doc.data());
                 } else {
-                    cookie.remove("player");
-                    cookie.remove("session");
+                    cookie.remove("cn_player");
+                    cookie.remove("cn_session");
                     this.props.clearGame();
                 }
             })
@@ -46,14 +72,8 @@ class Game extends Component {
         switch(this.props.stage) {
             case "lobby":
                 return this.lobby();
-            case "hints":
-                return <Row>{this.hints()}</Row>;
-            case "voting":
-                if (this.props.voting.voters.length === this.props.players.length) {
-                    return this.results();
-                } else {
-                    return this.voting();
-                }
+            case "game":
+                return this.game();
             default:
                 return null
         }
@@ -68,15 +88,41 @@ class Game extends Component {
                         <Col>
                             <Button onClick={() => {
                                 //Start Game
-                                let topic = Object.keys(this.props.topics)[Math.floor(Math.random()*Object.keys(this.props.topics).length)];
-                                let word = this.props.topics[topic][Math.floor(Math.random()*this.props.topics[topic].length)];
-                                let new_chameleon = Math.floor(Math.random()*this.props.players.length);
+                                let words = [];
+                                // console.log(this.props.words[this.props.version])
+                                while (words.length < 25) {
+                                    let word = this.props.words[this.props.version][Math.floor(Math.random()*this.props.words[this.props.version].length)];
+                                    if (!words.includes(word)) {
+                                        words.push(word)
+                                    }
+                                }
+                                // console.log(words);
+                                let board = Array(25).fill("C");
+                                let used = []
+                                let spot = Math.floor(Math.random()*25);
+                                board[spot] = "A";
+                                used.push(spot);
+                                while (used.length < 10) {
+                                    spot = Math.floor(Math.random()*25);
+                                    if (!used.includes(spot)) {
+                                        used.push(spot);
+                                        board[spot] = (this.props.round.id % 2) ? "B" : "R";
+                                    }
+                                }
+                                while (used.length < 18) {
+                                    spot = Math.floor(Math.random()*25);
+                                    if (!used.includes(spot)) {
+                                        used.push(spot);
+                                        board[spot] = (this.props.round.id % 2) ? "R" : "B";
+                                    }
+                                }
+                                // console.log(board)
                                 firestore.collection("sessions").doc(this.props.session.db_id).update({
-                                    stage: "hints",
-                                    "round.topic": topic,
-                                    "round.word": word,
-                                    "round.chameleon": new_chameleon,
-                                    "round.voting": []
+                                    stage: "game",
+                                    "round.words": words,
+                                    "round.board": board,
+                                    "round.guesses": Array(25).fill(""),
+                                    turn: (this.props.round.id % 2) ? "B" : "R",
                                 })
                             }}>Start Game</Button>
                         </Col>
@@ -100,7 +146,7 @@ class Game extends Component {
                         Leave Game
                     </Button>)
                 }
-            case "hints":
+            case "game":
                 if (this.props.players[0] === this.props.player_name) {
                     //HOST ONLY
                     return (<Row>
@@ -124,38 +170,6 @@ class Game extends Component {
                     </Row>)
                 }
                 break;
-            case "voting":
-                if (this.props.players[0] === this.props.player_name) {
-                    //HOST ONLY
-                    return (<Row>
-                        <Col>
-                            <Button onClick={() => {
-                                //Next Round
-                                let topic = Object.keys(this.props.topics)[Math.floor(Math.random()*Object.keys(this.props.topics).length)];
-                                let word = this.props.topics[topic][Math.floor(Math.random()*this.props.topics[topic].length)];
-                                let new_chameleon = Math.floor(Math.random()*this.props.players.length);
-                                firestore.collection("sessions").doc(this.props.session.db_id).update({
-                                    stage: "hints",
-                                    "round.id": this.props.round+1,
-                                    "round.topic": topic,
-                                    "round.word": word,
-                                    "round.chameleon": new_chameleon,
-                                    "round.voting": []
-                                })
-                            }}>Next Round</Button>
-                        </Col>
-                        <Col>
-                            <Button onClick={() => {
-                                firestore.collection("sessions").doc(this.props.session.db_id).update({
-                                    stage: "lobby",
-                                })
-                            }}>
-                                Return to Lobby
-                            </Button>
-                        </Col>
-                    </Row>)
-                }
-                break;
             default:
                 return null;
         }
@@ -163,110 +177,114 @@ class Game extends Component {
 
     lobby() {
         let lobby = [];
-        lobby.push(<Alert variant="info" key="code">{"Room Code: "+this.props.session.key}</Alert>)
-        for (let p in this.props.players) {
-            lobby.push(<ListGroup.Item key={p} active={this.props.player_name === this.props.players[p]}>
-                {this.props.players[p]}
-            </ListGroup.Item>)
+        if (this.props.player_team) {
+            lobby.push(<Alert variant="info" key="code">{"Room Code: "+this.props.session.key}</Alert>)
+            for (let r in this.props.teams.red) {
+                lobby.push(<ListGroup.Item  variant="danger" key={this.props.teams.red[r]}>
+                    {this.props.teams.red[r]}
+                </ListGroup.Item>)
+            }
+            for (let b in this.props.teams.blue) {
+                lobby.push(<ListGroup.Item  variant="primary" key={this.props.teams.blue[b]}>
+                    {this.props.teams.blue[b]}
+                </ListGroup.Item>)
+            }
+        } else {
+            lobby.push(<Row key="pick_team">
+                <Col>
+                    <Button variant="danger" onClick={() => {
+                        firestore.collection("sessions").doc(this.props.session.db_id).update({
+                            "teams.red": firebase.firestore.FieldValue.arrayUnion(this.props.player_name),
+                        }).then(() => {
+                            this.props.setTeam("red");
+                        });
+                    }}>
+                        Join RED Team
+                    </Button>
+                </Col>
+                    <Button variant="primary" onClick={() => {
+                        firestore.collection("sessions").doc(this.props.session.db_id).update({
+                            "teams.blue": firebase.firestore.FieldValue.arrayUnion(this.props.player_name),
+                        }).then(() => {
+                            this.props.setTeam("blue")
+                        });
+                    }}>
+                        Join BLUE Team
+                    </Button>
+                <Col>
+                </Col>
+            </Row>)
         }
         return lobby;
     }
 
-    hints() {
+    game() {
         let hints = []
         let counter = -1;
-        hints.push(<Col key={"players"}>
-                {this.props.players.map((p) => {
-                    counter += 1;
-                    return (<ListGroup.Item key={p}variant={this.props.round % this.props.players.length === counter ? "secondary" : ""}>
-                        {titleCase(p)}
-                    </ListGroup.Item>);
-                })}
-            </Col>);
-        hints.push(<br key={"break"}/>);
-        hints.push(<Col key="board+role">
-            <Row>
-                <Table bordered striped>
+        hints.push(<Row key={"players"}>
+            <Col>
+                <Alert variant="info">{this.props.guesses === 0 ? (this.props.turn==="R" ? "Red":"Blue")+" Codemaster is giving a hint." : (this.props.turn==="R" ? "Red":"Blue")+" team is making guesses."}</Alert>
+            </Col>
+        </Row>);
+        hints.push(<Row key="board+role">
+            <Col>
+                <Table bordered>
                     <tbody>
                         {this.genBoard()}
                     </tbody>
                 </Table>
-            </Row>
-                <Alert variant="info">
-                    {this.props.role ?
-                        "Secret Word: " + titleCase(this.props.role)
-                    :
-                        "You are the Chameleon!"
-                    }
-                </Alert>
-            <Row>
-            </Row>
-        </Col>)
+            </Col>
+        </Row>)
         return hints;
     }
 
     genBoard() {
         let rows = []
-        rows.push(<tr key={"head"}>
-            <th colSpan="4">{titleCase(this.props.topic)}</th>
-        </tr>)
-        for (let r in [0,1,2,3]) {
-            let row = <tr key={"r"+r}>
-                {[0,1,2,3].map((c) => {
-                    return <td key={"i"+(r*4 + c)}>
-                        {titleCase(this.props.topics[this.props.topic][r*4 + c])}
-                    </td>
-                })}
-            </tr>
-            rows.push(row)
+        //if codemaster
+        if (this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) {
+            for (let r in [0,1,2,3,4]) {
+                let row = <tr key={"r"+r}>
+                    {[0,1,2,3,4].map((c) => {
+                        let style = CIV_CARD;
+                        if (this.props.round.board[r*5 + c] === "A") {
+                            style = BLACK_CARD;
+                        } else if (this.props.round.board[r*5 + c] === "R") {
+                            style = RED_CARD;
+                        } else if (this.props.round.board[r*5 + c] === "B") {
+                            style = BLUE_CARD;
+                        }
+                        return <td style={style} key={"i"+(r*4 + c)}>
+                            <strong>{titleCase(this.props.round.words[r*5 + c])}</strong>
+                        </td>
+                    })}
+                </tr>
+                rows.push(row)
+            }
+        } else {
+            for (let r in [0,1,2,3,4]) {
+                let row = <tr key={"r"+r}>
+                    {[0,1,2,3,4].map((c) => {
+                        let style = BASIC_CARD;
+                        if (this.props.round.guesses[r*5 + c]) {
+                            if (this.props.round.board[r*5 + c] === "A") {
+                                style = BLACK_CARD;
+                            } else if (this.props.round.board[r*5 + c] === "R") {
+                                style = RED_CARD;
+                            } else if (this.props.round.board[r*5 + c] === "B") {
+                                style = BLUE_CARD;
+                            } else {
+                                style = CIV_CARD;
+                            }
+                        }
+                        return <td style={style} key={"i"+(r*4 + c)}>
+                            <strong>{titleCase(this.props.round.words[r*5 + c])}</strong>
+                        </td>
+                    })}
+                </tr>
+                rows.push(row)
+            }
         }
         return rows;
-    }
-
-    voting() {
-        let voting = [];
-        if (this.props.voting.voters.includes(this.props.player_name)) {
-            voting.push(<Alert variant={"info"} key="vote cast">
-                {"Your vote has been counted."}
-            </Alert>);
-        } else {
-            for (let p in this.props.players) {
-                voting.push(<ListGroup.Item key={p} id={p} onClick={() => {
-                    firestore.collection("sessions").doc(this.props.session.db_id).update({
-                        "round.voting": firebase.firestore.FieldValue.arrayUnion(this.props.player_name+"|"+this.props.players[p]),
-                    })
-                }}>
-                    {this.props.players[p]}
-                </ListGroup.Item>)
-            }
-        }
-        return voting;
-    }
-
-    results() {
-        let results = [];
-        let counts = {};
-        for (let v in this.props.voting.votes) {
-            if (this.props.voting.votes[v] in counts) {
-                counts[this.props.voting.votes[v]] += 1;
-            } else {
-                counts[this.props.voting.votes[v]] = 1;
-            }
-        }
-        for (let c in Object.keys(counts)) {
-            c = Object.keys(counts)[c];
-            results.push(<ListGroup.Item key={c} id={c}>
-                {c+": "+counts[c]}
-            </ListGroup.Item>)
-        }
-        results.push(<br/>);
-        results.push(<Table bordered striped>
-            <tbody>
-                {this.genBoard()}
-            </tbody>
-        </Table>);
-
-        return results;
     }
 
     render() {
@@ -291,13 +309,15 @@ class Game extends Component {
 const mapStateToProps = state => ({
     session: state.session,
     player_name: state.player_name,
+    player_team: state.player_team,
     stage: state.stage,
     players: state.players,
-    topics: state.topics,
-    topic: state.round.topic,
-    role: state.round.role,
-    round: state.round.id,
-    voting: state.voting,
+    teams: state.teams,
+    words: state.words,
+    version: state.version,
+    round: state.round,
+    turn: state.turn,
+    guesses: state.guesses,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -308,6 +328,10 @@ const mapDispatchToProps = dispatch => ({
     clearGame: () => dispatch({
         type: "clear_game",
         payload: null
+    }),
+    setTeam: (team) => dispatch({
+        type: "set_team",
+        payload: team
     }),
 });
 

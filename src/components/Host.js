@@ -25,12 +25,13 @@ class Host extends Component {
             let key = VALID_CHARS[Math.floor(Math.random()*VALID_CHARS.length)] + VALID_CHARS[Math.floor(Math.random()*VALID_CHARS.length)] + VALID_CHARS[Math.floor(Math.random()*VALID_CHARS.length)] + VALID_CHARS[Math.floor(Math.random()*VALID_CHARS.length)]
             firestore.collection("sessions").add({
                 players: [this.state.player_name],
+                teams: {red: [], blue: []},
                 key: key,
                 stage: "lobby",
                 round: {
                     id: 0,
-                    words: "",
-                    role: ""
+                    words: [],
+                    board: []
                 }
             }).then(ref => {
                 this.props.setSession(key, ref.id)

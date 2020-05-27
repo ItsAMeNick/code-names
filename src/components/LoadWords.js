@@ -13,7 +13,6 @@ class LoadWords extends Component {
     }
 
     componentDidMount() {
-        let today = new Date()
         firestore.collection("words").get().then(resp => {
             let words = {}
             for (let topic in resp.docs) {
