@@ -35,8 +35,8 @@ class Join extends Component {
                             })
                             this.props.setSession(resp.docs[0].data().key, resp.docs[0].id);
                             this.props.setPlayer(this.state.player_name);
-                            cookie.save("session", {key: resp.docs[0].data().key, db_id: resp.docs[0].id})
-                            cookie.save("player", this.state.player_name)
+                            cookie.save("cn_session", {key: resp.docs[0].data().key, db_id: resp.docs[0].id})
+                            cookie.save("cn_player", this.state.player_name)
                         }
                     } else {
                         this.setState({error_message: "Session key does not exist."})

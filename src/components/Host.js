@@ -29,15 +29,14 @@ class Host extends Component {
                 stage: "lobby",
                 round: {
                     id: 0,
-                    topic: "",
-                    word: "",
-                    chameleon: 0
+                    words: "",
+                    role: ""
                 }
             }).then(ref => {
                 this.props.setSession(key, ref.id)
                 this.props.setPlayer(this.state.player_name);
-                cookie.save("session", {key: key, db_id: ref.id})
-                cookie.save("player", this.state.player_name)
+                cookie.save("cn_session", {key: key, db_id: ref.id})
+                cookie.save("cn_player", this.state.player_name)
             })
         } else {
             this.setState({error_message: "Enter a Name!"})

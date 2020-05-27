@@ -19,8 +19,8 @@ class Menu extends Component {
     }
 
     componentDidMount() {
-        let session = cookie.load("session");
-        let name = cookie.load("player");
+        let session = cookie.load("cn_session");
+        let name = cookie.load("cn_player");
         if (session && session.key && session.db_id && name) {
                 this.props.setSession(session);
                 this.props.setPlayer(name);
@@ -69,7 +69,7 @@ class Menu extends Component {
             <div>
                 <Card>
                     <Card.Header>
-                        The Chameleon Game
+                        Code Names
                     </Card.Header>
                     {this.genBody()}
                     <Card.Footer>

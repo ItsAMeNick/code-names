@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 
-import LoadTopics from "./components/LoadTopics.js";
+import LoadWords from "./components/LoadWords.js";
 import Menu from "./components/Menu.js";
 import Game from  "./components/Game.js";
 
@@ -23,7 +23,7 @@ class App extends Component {
               integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
               crossOrigin="anonymous"
             />
-            {/*<button onClick={() => this.props.debug()}>DEBUG</button>*/}
+            <button onClick={() => this.props.debug()}>DEBUG</button>
             {this.props.db_updated ?
                 <>
                 {this.props.session.key && this.props.session.db_id ?
@@ -33,7 +33,7 @@ class App extends Component {
                 }
                 </>
             :
-                <LoadTopics/>
+                <LoadWords/>
             }
             </div>
         );
