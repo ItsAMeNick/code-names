@@ -139,9 +139,11 @@ class Game extends Component {
                     return (<Button onClick={() => {
                         firestore.collection("sessions").doc(this.props.session.db_id).update({
                             players: firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                            "teams.red": firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                            "teams.blue": firebase.firestore.FieldValue.arrayRemove(this.props.player_name)
                         }).then(() => {
-                            cookie.remove("player");
-                            cookie.remove("session");
+                            cookie.remove("cn_player");
+                            cookie.remove("cn_session");
                             this.props.clearGame();
                         })
                     }}>
@@ -217,7 +219,19 @@ class Game extends Component {
         game.push(<Row key={"you"}>
             <Col>
                 <Alert variant={this.props.player_team === "red" ? "danger" : "primary"}>
-                    {(((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) ? "Codemaster " : "Agent ") + this.props.player_name}
+                    {(((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) ? "Codemaster " : "Agent ") + titleCase(this.props.player_name)}
+                </Alert>
+            </Col>
+        </Row>);
+        game.push(<Row key={"scores"}>
+            <Col>
+                <Alert variant="dark">
+                    {"Red Score: " + this.props.score.red}
+                </Alert>
+            </Col>
+            <Col>
+                <Alert variant="dark">
+                    {"Blue Score: " + this.props.score.blue}
                 </Alert>
             </Col>
         </Row>);
@@ -232,20 +246,72 @@ class Game extends Component {
         </Row>)
         game.push(<Row key={"players"}>
             <Col>
-                <Alert variant="info">{this.props.guesses === 0 ? (this.props.turn==="R" ? "Red":"Blue")+" Codemaster is giving a hint." : (this.props.turn==="R" ? "Red":"Blue")+" team is making guesses."}</Alert>
+                <Alert variant="dark">{this.props.guesses === 0 ? (this.props.turn==="R" ? "Red":"Blue")+" Codemaster is giving a hint." : (this.props.turn==="R" ? "Red":"Blue")+" team is making guesses."}</Alert>
             </Col>
         </Row>);
-        if (this.props.guesses === 0 && (this.props.turn==="R" ? "red":"blue") === this.props.player_team) {
-            game.push(<Row key={"guesses"}>
-                {(this.props.turn === "R") ? <Col>
-                    <Button variant="secondary">1</Button>
-                </Col>
+        if (this.props.guesses === 0 && ((this.props.turn==="R" ? "red":"blue") === this.props.player_team) && ((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name))) {
+            game.push(<div key={"guesses"}>
+                {((((this.props.turn === "R") && (this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name))
+                || ((this.props.turn === "B") && (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)))
+                && (this.props.guesses === 0)) ?
+                    <Row>
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 9 : 8)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 9 : 8)))) ?
+                        <Col>
+                            <Button variant="secondary">1</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 8 : 7)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 8 : 7)))) ?
+                        <Col>
+                            <Button variant="secondary">2</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 7 : 6)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 7 : 6)))) ?
+                        <Col>
+                            <Button variant="secondary">3</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 6 : 5)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 6 : 5)))) ?
+                        <Col>
+                            <Button variant="secondary">4</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 6 : 4)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 6 : 4)))) ?
+                        <Col>
+                            <Button variant="secondary">5</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 5 : 3)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 5 : 3)))) ?
+                        <Col>
+                            <Button variant="secondary">6</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 4 : 2)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 4 : 2)))) ?
+                        <Col>
+                            <Button variant="secondary">7</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 3 : 1)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 3 : 1)))) ?
+                        <Col>
+                            <Button variant="secondary">8</Button>
+                        </Col>
+                    : null}
+                    {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 2 : 0)))
+                    || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 2 : 0)))) ?
+                        <Col>
+                            <Button variant="secondary">9</Button>
+                        </Col>
+                    : null}
+                    </Row>
                 : null}
-                {true ? <Col>
-                    <Button variant="secondary">2</Button>
-                </Col>
-                : null}
-            </Row>);
+            </div>);
         }
         return game;
     }
@@ -330,6 +396,7 @@ const mapStateToProps = state => ({
     round: state.round,
     turn: state.turn,
     guesses: state.guesses,
+    score: state.score,
 });
 
 const mapDispatchToProps = dispatch => ({
