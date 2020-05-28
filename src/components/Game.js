@@ -183,7 +183,6 @@ class Game extends Component {
                         Leave Game
                     </Button>)
                 }
-                break;
             default:
                 return null;
         }
@@ -231,6 +230,7 @@ class Game extends Component {
             turn: (this.props.round.id % 2) ? "B" : "R",
             guesses: 0,
             score: {red: 0, blue: 0},
+            bonus: false,
         })
     }
 
@@ -412,15 +412,39 @@ class Game extends Component {
                 : null}
             </div>);
         }
-        game.push(<div key={"guesses_remaining"}>
-            {this.props.guesses > 0 ?
-                <Row>
-                    <Col>
-                        <Alert variant="dark">{(this.props.turn==="R" ? "Red":"Blue")+" team has " + this.props.guesses + " guesses remaining."}</Alert>
-                    </Col>
-                </Row>
-            : null}
-        </div>);
+        if (this.props.guesses > 0) {
+            if (this.props.bonus) {
+                game.push(
+                    <Row key="info_guesses">
+                        <Col>
+                            <Alert variant="dark">{(this.props.turn==="R" ? "Red":"Blue")+" team has a Bonus Guess!"}</Alert>
+                        </Col>
+                        {((this.props.player_team === "red" && this.props.turn === "R") || (this.props.player_team === "blue" && this.props.turn === "B")) ?
+                            <Col>
+                                <Button onClick={()=> {
+                                    let newTurn = (this.props.player_team === "blue") ? "R" : "B";
+                                    firestore.collection("sessions").doc(this.props.session.db_id).update({
+                                        guesses: 0,
+                                        bonus: false,
+                                        turn: newTurn,
+                                    })
+                                }}>Skip Bonus Guess</Button>
+                            </Col>
+                        :
+                            null
+                        }
+                    </Row>
+                );
+            } else {
+                game.push(
+                    <Row key="info_guesses">
+                        <Col>
+                            <Alert variant="dark">{(this.props.turn==="R" ? "Red":"Blue")+" team has " + this.props.guesses + " guesses remaining."}</Alert>
+                        </Col>
+                    </Row>
+                );
+            }
+        }
         return game;
     }
 
@@ -519,8 +543,14 @@ class Game extends Component {
                                             break;
                                         }
                                     }
-                                    if (data.guesses - 1 < 0) {
-                                        newTurn = (this.props.player_team === "blue") ? "R" : "B";
+                                    if (data.guesses <= 0 && (((this.props.player_team === "red") && (data.round.board[r*5 + c] === "R")) || ((this.props.player_team === "blue") && (data.round.board[r*5 + c] === "B")))) {
+                                        if (!data.bonus) {
+                                            data.bonus = true;
+                                            data.guesses = 1;
+                                        } else {
+                                            newTurn = (this.props.player_team === "blue") ? "R" : "B";
+                                            data.bonus = false;
+                                        }
                                     }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
                                         data.stage = "results";
@@ -532,7 +562,8 @@ class Game extends Component {
                                         turn: newTurn,
                                         score: data.score,
                                         stage: data.stage,
-                                        "round.id": data.round.id
+                                        "round.id": data.round.id,
+                                        bonus: data.bonus,
                                     })
                                 }
                             })}
@@ -579,6 +610,7 @@ const mapStateToProps = state => ({
     turn: state.turn,
     guesses: state.guesses,
     score: state.score,
+    bonus: state.bonus,
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -24,6 +24,7 @@ const initialState = {
     },
     turn: "",
     guesses: 0,
+    bonus: false,
     score: {
         red: 0,
         blue: 0
@@ -80,6 +81,7 @@ const codeNamesReducer = (state = initialState, action) => {
         newState.round = action.payload.round;
         newState.turn = action.payload.turn;
         newState.guesses = action.payload.guesses;
+        newState.bonus = action.payload.bonus;
         newState.score = action.payload.score;
         if (action.payload.players[action.payload.round.chameleon] === state.player_name) {
             newState.round.role = "";
