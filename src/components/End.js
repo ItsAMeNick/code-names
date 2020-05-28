@@ -82,6 +82,16 @@ class End extends Component {
                         {(((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) ? "Codemaster " : "Agent ") + titleCase(this.props.player_name)}
                     </Alert>
                 </Col>
+                <Col>
+                    <Alert variant="dark">
+                        {"Red Score: " + this.props.score.red}
+                    </Alert>
+                </Col>
+                <Col>
+                    <Alert variant="dark">
+                        {"Blue Score: " + this.props.score.blue}
+                    </Alert>
+                </Col>
             </Row>
             <Row>
                 {this.props.player_team === "red" ?
@@ -101,24 +111,14 @@ class End extends Component {
                     }
                 </Col>
                 }
+            </Row>
+            <Row key={"scores"}>
                 <Col>
                     <Table bordered>
                         <tbody>
                             {this.genBoard()}
                         </tbody>
                     </Table>
-                </Col>
-            </Row>
-            <Row key={"scores"}>
-                <Col>
-                    <Alert variant="dark">
-                        {"Red Score: " + this.props.score.red}
-                    </Alert>
-                </Col>
-                <Col>
-                    <Alert variant="dark">
-                        {"Blue Score: " + this.props.score.blue}
-                    </Alert>
                 </Col>
             </Row>
         </React.Fragment>);

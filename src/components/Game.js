@@ -94,9 +94,12 @@ class Game extends Component {
             case "lobby":
                 if (this.props.players[0] === this.props.player_name) {
                     //HOST ONLY
-                    return (<Row>
+                    return(<Row>
                         <Col>
                             <Button onClick={() => this.startGame()}>Start Game</Button>
+                        </Col>
+                        <Col>
+                            <Button variant={this.props.player_team === "red" ? "primary" : "danger"} onClick={() => this.switchTeams()}>Switch Teams</Button>
                         </Col>
                         <Col>
                             <Button onClick={() => {
@@ -106,19 +109,26 @@ class Game extends Component {
                         </Col>
                     </Row>)
                 } else {
-                    return (<Button onClick={() => {
-                        firestore.collection("sessions").doc(this.props.session.db_id).update({
-                            players: firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
-                            "teams.red": firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
-                            "teams.blue": firebase.firestore.FieldValue.arrayRemove(this.props.player_name)
-                        }).then(() => {
-                            cookie.remove("cn_player");
-                            cookie.remove("cn_session");
-                            this.props.clearGame();
-                        })
-                    }}>
-                        Leave Game
-                    </Button>)
+                    return(<Row>
+                        <Col>
+                            <Button onClick={() => this.switchTeams()}>Switch Teams</Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => {
+                                firestore.collection("sessions").doc(this.props.session.db_id).update({
+                                    players: firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                                    "teams.red": firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                                    "teams.blue": firebase.firestore.FieldValue.arrayRemove(this.props.player_name)
+                                }).then(() => {
+                                    cookie.remove("cn_player");
+                                    cookie.remove("cn_session");
+                                    this.props.clearGame();
+                                })
+                            }}>
+                                Leave Game
+                            </Button>
+                        </Col>
+                    </Row>)
                 }
             case "game":
                 if (this.props.players[0] === this.props.player_name) {
@@ -158,6 +168,20 @@ class Game extends Component {
                             }}>End Game</Button>
                         </Col>
                     </Row>)
+                } else {
+                    return (<Button onClick={() => {
+                        firestore.collection("sessions").doc(this.props.session.db_id).update({
+                            players: firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                            "teams.red": firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                            "teams.blue": firebase.firestore.FieldValue.arrayRemove(this.props.player_name)
+                        }).then(() => {
+                            cookie.remove("cn_player");
+                            cookie.remove("cn_session");
+                            this.props.clearGame();
+                        })
+                    }}>
+                        Leave Game
+                    </Button>)
                 }
                 break;
             default:
@@ -167,6 +191,9 @@ class Game extends Component {
 
     startGame() {
         //Start Game
+
+        if (this.props.players < 4 || this.props.teams.red.length < 2 || this.props.teams.blue.length < 2) return null;
+
         let words = [];
         // console.log(this.props.words[this.props.version])
         while (words.length < 25) {
@@ -205,6 +232,24 @@ class Game extends Component {
             guesses: 0,
             score: {red: 0, blue: 0},
         })
+    }
+
+    switchTeams() {
+        if (this.props.player_team === "red") {
+            firestore.collection("sessions").doc(this.props.session.db_id).update({
+                "teams.red": firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                "teams.blue": firebase.firestore.FieldValue.arrayUnion(this.props.player_name),
+            }).then(() => {
+                this.props.setTeam("blue");
+            });
+        } else {
+            firestore.collection("sessions").doc(this.props.session.db_id).update({
+                "teams.blue": firebase.firestore.FieldValue.arrayRemove(this.props.player_name),
+                "teams.red": firebase.firestore.FieldValue.arrayUnion(this.props.player_name),
+            }).then(() => {
+                this.props.setTeam("red");
+            });
+        }
     }
 
     lobby() {
