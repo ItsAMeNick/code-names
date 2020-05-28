@@ -410,23 +410,19 @@ class Game extends Component {
                                             if (this.props.player_team === "blue") {
                                                 newTurn = "R";
                                                 data.guesses = 0;
-                                            } else {
-                                                newTurn = "B"
                                             }
                                             break;
                                         }
                                         case "B": {
                                             data.score.blue += 1;
                                             if (this.props.player_team === "red") {
-                                                newTurn = "R";
+                                                newTurn = "B";
                                                 data.guesses = 0;
-                                            } else {
-                                                newTurn = "B"
                                             }
                                             break;
                                         }
                                         case "C": {
-                                            if (this.props.player_team === "red") {
+                                            if (data.turn === "R") {
                                                 newTurn = "B";
                                                 data.guesses = 0;
                                             } else {
@@ -440,8 +436,10 @@ class Game extends Component {
                                             break;
                                         }
                                     }
-                                    if (data.guesses - 1 <= 0) {
-                                        newTurn = (newTurn === "B") ? "R" : "B";
+                                    console.log(data.guesses)
+                                    if (data.guesses - 1 < 0) {
+                                        console.log("No guesses!")
+                                        newTurn = (this.props.player_team === "blue") ? "R" : "B";
                                     }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
                                         window.alert("YOU WIN! That was the final word.")
