@@ -389,7 +389,7 @@ class Game extends Component {
                         }
                         return <td id={r*5 + c} style={style} key={"i"+(r*5 + c)}
                         onClick={()=> {
-                            //Verify that you can actually make the guess (avoid errors on simult guessing)
+                            if ((this.props.turn === "R" && this.props.player_team === "red") || (this.props.turn === "B" && this.props.player_team === "blue")) {//Verify that you can actually make the guess (avoid errors on simult guessing)
                             firestore.collection("sessions").doc(this.props.session.db_id).get().then(doc => {
                                 let data = doc.data();
                                 let newTurn = this.props.player_team === "red" ? "R" : "B";
@@ -453,7 +453,7 @@ class Game extends Component {
                                         stage: data.stage
                                     })
                                 }
-                            })
+                            })}
                         }}>
                             <strong>{titleCase(this.props.round.words[r*5 + c])}</strong>
                         </td>
