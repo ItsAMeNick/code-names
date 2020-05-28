@@ -23,7 +23,7 @@ class App extends Component {
               integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
               crossOrigin="anonymous"
             />
-            <button onClick={() => this.props.debug()}>DEBUG</button>
+            {/*<button onClick={() => this.props.debug()}>DEBUG</button>*/}
             {/*<button onClick={() => this.props.load()}>Load Words</button>*/}
             {this.props.db_updated ?
                 <>
