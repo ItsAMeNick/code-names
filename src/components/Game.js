@@ -398,7 +398,7 @@ class Game extends Component {
                                     data.guesses = data.guesses - 1;
                                     switch (data.round.board[r*5 + c]) {
                                         case "A": {
-                                            console.log("The current team LOSES!");
+                                            window.alert("YOU LOSE! That was the assassin word.")
                                             data.guesses = 0;
                                             data.stage = "lobby";
                                             data.round.id = data.round.id + 1
@@ -444,7 +444,7 @@ class Game extends Component {
                                         newTurn = (newTurn === "B") ? "R" : "B";
                                     }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
-                                        console.log("winner!")
+                                        window.alert("YOU WIN! That was the final word.")
                                         data.stage = "lobby";
                                         data.round.id = data.round.id + 1
                                     }
