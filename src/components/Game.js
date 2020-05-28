@@ -68,6 +68,12 @@ class Game extends Component {
             })
     }
 
+    giveGuesses(count) {
+        firestore.collection("sessions").doc(this.props.session.db_id).update({
+            guesses: count
+        })
+    }
+
     genBody() {
         switch(this.props.stage) {
             case "lobby":
@@ -258,61 +264,88 @@ class Game extends Component {
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 9 : 8)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 9 : 8)))) ?
                         <Col>
-                            <Button variant="secondary">1</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(1);
+                            }}>1</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 8 : 7)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 8 : 7)))) ?
                         <Col>
-                            <Button variant="secondary">2</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(2);
+                            }}>2</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 7 : 6)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 7 : 6)))) ?
                         <Col>
-                            <Button variant="secondary">3</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(3);
+                            }}>3</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 6 : 5)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 6 : 5)))) ?
                         <Col>
-                            <Button variant="secondary">4</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(4);
+                            }}>4</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 5 : 4)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 5 : 4)))) ?
                         <Col>
-                            <Button variant="secondary">5</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(5);
+                            }}>5</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 4 : 3)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 4 : 3)))) ?
                         <Col>
-                            <Button variant="secondary">6</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(6);
+                            }}>6</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 3 : 2)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 3 : 2)))) ?
                         <Col>
-                            <Button variant="secondary">7</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(7);
+                            }}>7</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 2 : 1)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 2 : 1)))) ?
                         <Col>
-                            <Button variant="secondary">8</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(8);
+                            }}>8</Button>
                         </Col>
                     : null}
                     {(((this.props.turn === "R") && (this.props.score.red < (!(this.props.round.id % 2) ? 1 : 0)))
                     || ((this.props.turn === "B") && (this.props.score.blue < ((this.props.round.id % 2) ? 1 : 0)))) ?
                         <Col>
-                            <Button variant="secondary">9</Button>
+                            <Button variant="secondary" onClick={() => {
+                                this.giveGuesses(9);
+                            }}>9</Button>
                         </Col>
                     : null}
                     </Row>
                 : null}
             </div>);
         }
+        game.push(<div key={"guesses_remaining"}>
+            {this.props.guesses > 0 ?
+                <Row>
+                    <Col>
+                        <Alert variant="dark">{(this.props.turn==="R" ? "Red":"Blue")+" team has " + this.props.guesses + " guesses remaining."}</Alert>
+                    </Col>
+                </Row>
+            : null}
+        </div>);
         return game;
     }
 
@@ -331,7 +364,7 @@ class Game extends Component {
                         } else if (this.props.round.board[r*5 + c] === "B") {
                             style = BLUE_CARD;
                         }
-                        return <td style={style} key={"i"+(r*4 + c)}>
+                        return <td id={r*4 + c} style={style} key={"i"+(r*5 + c)}>
                             <strong>{titleCase(this.props.round.words[r*5 + c])}</strong>
                         </td>
                     })}
@@ -354,7 +387,74 @@ class Game extends Component {
                                 style = CIV_CARD;
                             }
                         }
-                        return <td style={style} key={"i"+(r*4 + c)}>
+                        return <td id={r*5 + c} style={style} key={"i"+(r*5 + c)}
+                        onClick={()=> {
+                            //Verify that you can actually make the guess (avoid errors on simult guessing)
+                            firestore.collection("sessions").doc(this.props.session.db_id).get().then(doc => {
+                                let data = doc.data();
+                                let newTurn = this.props.player_team === "red" ? "R" : "B";
+                                if (data.guesses > 0 && !data.round.guesses[r*5 + c]) {
+                                    data.round.guesses[r*5 + c] = "X";
+                                    data.guesses = data.guesses - 1;
+                                    if (data.guesses - 1 <= 0) {
+                                        newTurn = (newTurn === "B") ? "R" : "B";
+                                    }
+                                    switch (data.round.board[r*5 + c]) {
+                                        case "A": {
+                                            console.log("The current team LOSES!");
+                                            data.guesses = 0;
+                                            break;
+                                        }
+                                        case "R": {
+                                            if (this.props.player_team === "red") {
+                                                data.score.red += 1;
+                                            } else {
+                                                data.score.blue += 1;
+                                                newTurn = "B";
+                                                data.guesses = 0;
+                                            }
+                                            break;
+                                        }
+                                        case "B": {
+                                            if (this.props.player_team === "blue") {
+                                                data.score.blue += 1;
+                                            } else {
+                                                data.score.red += 1;
+                                                newTurn = "R";
+                                                data.guesses = 0;
+                                            }
+                                            break;
+                                        }
+                                        case "C": {
+                                            if (this.props.player_team === "red") {
+                                                newTurn = "B";
+                                                data.guesses = 0;
+                                            } else {
+                                                newTurn = "R";
+                                                data.guesses = 0;
+                                            }
+                                            break;
+                                        }
+                                        default: {
+                                            console.log("AHH");
+                                            break;
+                                        }
+                                    }
+                                    console.log(this.props.score.red)
+                                    if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
+                                        console.log("winner!")
+                                        data.stage = "lobby";
+                                    }
+                                    firestore.collection("sessions").doc(this.props.session.db_id).update({
+                                        guesses: data.guesses,
+                                        "round.guesses": data.round.guesses,
+                                        turn: newTurn,
+                                        score: data.score,
+                                        stage: data.stage
+                                    })
+                                }
+                            })
+                        }}>
                             <strong>{titleCase(this.props.round.words[r*5 + c])}</strong>
                         </td>
                     })}
