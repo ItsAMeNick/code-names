@@ -392,43 +392,41 @@ class Game extends Component {
                             if ((this.props.turn === "R" && this.props.player_team === "red") || (this.props.turn === "B" && this.props.player_team === "blue")) {//Verify that you can actually make the guess (avoid errors on simult guessing)
                             firestore.collection("sessions").doc(this.props.session.db_id).get().then(doc => {
                                 let data = doc.data();
-                                let newTurn = this.props.turn === "R" ? "R" : "B";
+                                let newTurn = (data.turn === "R") ? "R" : "B";
                                 if (data.guesses > 0 && !data.round.guesses[r*5 + c]) {
                                     data.round.guesses[r*5 + c] = "X";
                                     data.guesses = data.guesses - 1;
-                                    if (data.guesses - 1 <= 0) {
-                                        newTurn = (newTurn === "B") ? "R" : "B";
-                                    }
                                     switch (data.round.board[r*5 + c]) {
                                         case "A": {
                                             console.log("The current team LOSES!");
                                             data.guesses = 0;
+                                            data.stage = "lobby";
+                                            data.round.id = data.round.id + 1
                                             break;
                                         }
                                         case "R": {
-                                            if (data.turn === "R") {
-                                                data.score.red += 1;
+                                            data.score.red += 1;
+                                            console.log(this.props.player_team)
+                                            if (this.props.player_team === "blue") {
                                                 newTurn = "R";
-                                            } else {
-                                                data.score.blue += 1;
-                                                newTurn = "B";
                                                 data.guesses = 0;
+                                            } else {
+                                                newTurn = "B"
                                             }
                                             break;
                                         }
                                         case "B": {
-                                            if (data.turn === "B") {
-                                                data.score.blue += 1;
-                                                newTurn = "B";
-                                            } else {
-                                                data.score.red += 1;
+                                            data.score.blue += 1;
+                                            if (this.props.player_team === "red") {
                                                 newTurn = "R";
                                                 data.guesses = 0;
+                                            } else {
+                                                newTurn = "B"
                                             }
                                             break;
                                         }
                                         case "C": {
-                                            if (data.turn === "R") {
+                                            if (this.props.player_team === "red") {
                                                 newTurn = "B";
                                                 data.guesses = 0;
                                             } else {
@@ -442,17 +440,21 @@ class Game extends Component {
                                             break;
                                         }
                                     }
-                                    console.log(this.props.score.red)
+                                    if (data.guesses - 1 <= 0) {
+                                        newTurn = (newTurn === "B") ? "R" : "B";
+                                    }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
                                         console.log("winner!")
                                         data.stage = "lobby";
+                                        data.round.id = data.round.id + 1
                                     }
                                     firestore.collection("sessions").doc(this.props.session.db_id).update({
                                         guesses: data.guesses,
                                         "round.guesses": data.round.guesses,
                                         turn: newTurn,
                                         score: data.score,
-                                        stage: data.stage
+                                        stage: data.stage,
+                                        "round.id": data.round.id
                                     })
                                 }
                             })}
