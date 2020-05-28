@@ -392,7 +392,7 @@ class Game extends Component {
                             if ((this.props.turn === "R" && this.props.player_team === "red") || (this.props.turn === "B" && this.props.player_team === "blue")) {//Verify that you can actually make the guess (avoid errors on simult guessing)
                             firestore.collection("sessions").doc(this.props.session.db_id).get().then(doc => {
                                 let data = doc.data();
-                                let newTurn = this.props.player_team === "red" ? "R" : "B";
+                                let newTurn = this.props.turn === "R" ? "R" : "B";
                                 if (data.guesses > 0 && !data.round.guesses[r*5 + c]) {
                                     data.round.guesses[r*5 + c] = "X";
                                     data.guesses = data.guesses - 1;
@@ -408,6 +408,7 @@ class Game extends Component {
                                         case "R": {
                                             if (data.turn === "R") {
                                                 data.score.red += 1;
+                                                newTurn = "R";
                                             } else {
                                                 data.score.blue += 1;
                                                 newTurn = "B";
@@ -418,6 +419,7 @@ class Game extends Component {
                                         case "B": {
                                             if (data.turn === "B") {
                                                 data.score.blue += 1;
+                                                newTurn = "B";
                                             } else {
                                                 data.score.red += 1;
                                                 newTurn = "R";
