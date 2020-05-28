@@ -406,7 +406,7 @@ class Game extends Component {
                                             break;
                                         }
                                         case "R": {
-                                            if (this.props.player_team === "red") {
+                                            if (data.turn === "R") {
                                                 data.score.red += 1;
                                             } else {
                                                 data.score.blue += 1;
@@ -416,7 +416,7 @@ class Game extends Component {
                                             break;
                                         }
                                         case "B": {
-                                            if (this.props.player_team === "blue") {
+                                            if (data.turn === "B") {
                                                 data.score.blue += 1;
                                             } else {
                                                 data.score.red += 1;
@@ -426,7 +426,7 @@ class Game extends Component {
                                             break;
                                         }
                                         case "C": {
-                                            if (this.props.player_team === "red") {
+                                            if (data.turn === "R") {
                                                 newTurn = "B";
                                                 data.guesses = 0;
                                             } else {
