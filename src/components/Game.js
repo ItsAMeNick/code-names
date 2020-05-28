@@ -12,6 +12,8 @@ import ListGroup from "react-bootstrap/ListGroup";
 import Alert from "react-bootstrap/Alert";
 import Table from "react-bootstrap/Table";
 
+import End from "./End.js";
+
 function titleCase(string) {
     if (!string) return "";
     let sentence = string.toLowerCase().split(" ");
@@ -80,6 +82,8 @@ class Game extends Component {
                 return this.lobby();
             case "game":
                 return this.game();
+            case "results":
+                return <End/>;
             default:
                 return null
         }
@@ -92,47 +96,7 @@ class Game extends Component {
                     //HOST ONLY
                     return (<Row>
                         <Col>
-                            <Button onClick={() => {
-                                //Start Game
-                                let words = [];
-                                // console.log(this.props.words[this.props.version])
-                                while (words.length < 25) {
-                                    let word = this.props.words[this.props.version][Math.floor(Math.random()*this.props.words[this.props.version].length)];
-                                    if (!words.includes(word)) {
-                                        words.push(word)
-                                    }
-                                }
-                                // console.log(words);
-                                let board = Array(25).fill("C");
-                                let used = []
-                                let spot = Math.floor(Math.random()*25);
-                                board[spot] = "A";
-                                used.push(spot);
-                                while (used.length < 10) {
-                                    spot = Math.floor(Math.random()*25);
-                                    if (!used.includes(spot)) {
-                                        used.push(spot);
-                                        board[spot] = (this.props.round.id % 2) ? "B" : "R";
-                                    }
-                                }
-                                while (used.length < 18) {
-                                    spot = Math.floor(Math.random()*25);
-                                    if (!used.includes(spot)) {
-                                        used.push(spot);
-                                        board[spot] = (this.props.round.id % 2) ? "R" : "B";
-                                    }
-                                }
-                                // console.log(board)
-                                firestore.collection("sessions").doc(this.props.session.db_id).update({
-                                    stage: "game",
-                                    "round.words": words,
-                                    "round.board": board,
-                                    "round.guesses": Array(25).fill(""),
-                                    turn: (this.props.round.id % 2) ? "B" : "R",
-                                    guesses: 0,
-                                    score: {red: 0, blue: 0},
-                                })
-                            }}>Start Game</Button>
+                            <Button onClick={() => this.startGame()}>Start Game</Button>
                         </Col>
                         <Col>
                             <Button onClick={() => {
@@ -172,9 +136,75 @@ class Game extends Component {
                     </Row>)
                 }
                 break;
+            case "results":
+                if (this.props.players[0] === this.props.player_name) {
+                    return (<Row>
+                        <Col>
+                            <Button onClick={() => this.startGame()}>Next Round</Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => {
+                                firestore.collection("sessions").doc(this.props.session.db_id).update({
+                                    stage: "lobby",
+                                })
+                            }}>
+                                Return to Lobby
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => {
+                                //End Game
+                                firestore.collection("sessions").doc(this.props.session.db_id).delete()
+                            }}>End Game</Button>
+                        </Col>
+                    </Row>)
+                }
+                break;
             default:
                 return null;
         }
+    }
+
+    startGame() {
+        //Start Game
+        let words = [];
+        // console.log(this.props.words[this.props.version])
+        while (words.length < 25) {
+            let word = this.props.words[this.props.version][Math.floor(Math.random()*this.props.words[this.props.version].length)];
+            if (!words.includes(word)) {
+                words.push(word)
+            }
+        }
+        // console.log(words);
+        let board = Array(25).fill("C");
+        let used = []
+        let spot = Math.floor(Math.random()*25);
+        board[spot] = "A";
+        used.push(spot);
+        while (used.length < 10) {
+            spot = Math.floor(Math.random()*25);
+            if (!used.includes(spot)) {
+                used.push(spot);
+                board[spot] = (this.props.round.id % 2) ? "B" : "R";
+            }
+        }
+        while (used.length < 18) {
+            spot = Math.floor(Math.random()*25);
+            if (!used.includes(spot)) {
+                used.push(spot);
+                board[spot] = (this.props.round.id % 2) ? "R" : "B";
+            }
+        }
+        // console.log(board)
+        firestore.collection("sessions").doc(this.props.session.db_id).update({
+            stage: "game",
+            "round.words": words,
+            "round.board": board,
+            "round.guesses": Array(25).fill(""),
+            turn: (this.props.round.id % 2) ? "B" : "R",
+            guesses: 0,
+            score: {red: 0, blue: 0},
+        })
     }
 
     lobby() {
@@ -365,7 +395,11 @@ class Game extends Component {
                             style = BLUE_CARD;
                         }
                         return <td id={r*4 + c} style={style} key={"i"+(r*5 + c)}>
-                            <strong>{((this.props.round.guesses[r*5 + c]) ? "" : titleCase(this.props.round.words[r*5 + c]))}</strong>
+                            {(this.props.round.guesses[r*5 + c]) ?
+                                <del>{titleCase(this.props.round.words[r*5 + c])}</del>
+                            :
+                                <strong>{titleCase(this.props.round.words[r*5 + c])}</strong>
+                            }
                         </td>
                     })}
                 </tr>
@@ -398,15 +432,20 @@ class Game extends Component {
                                     data.guesses = data.guesses - 1;
                                     switch (data.round.board[r*5 + c]) {
                                         case "A": {
-                                            window.alert("YOU LOSE! That was the assassin word.")
                                             data.guesses = 0;
-                                            data.stage = "lobby";
+                                            data.stage = "results";
                                             data.round.id = data.round.id + 1
+                                            if (this.props.player_team === "red") {
+                                                data.score.red = -1;
+                                                //data.score.blue = ((this.props.round.id % 2) ? 9 : 8);
+                                            } else {
+                                                //data.score.red = (!(this.props.round.id % 2) ? 9 : 8);
+                                                data.score.blue = -1;
+                                            }
                                             break;
                                         }
                                         case "R": {
                                             data.score.red += 1;
-                                            console.log(this.props.player_team)
                                             if (this.props.player_team === "blue") {
                                                 newTurn = "R";
                                                 data.guesses = 0;
@@ -432,7 +471,6 @@ class Game extends Component {
                                             break;
                                         }
                                         default: {
-                                            console.log("AHH");
                                             break;
                                         }
                                     }
@@ -440,8 +478,7 @@ class Game extends Component {
                                         newTurn = (this.props.player_team === "blue") ? "R" : "B";
                                     }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
-                                        window.alert("YOU WIN! That was the final word.")
-                                        data.stage = "lobby";
+                                        data.stage = "results";
                                         data.round.id = data.round.id + 1
                                     }
                                     firestore.collection("sessions").doc(this.props.session.db_id).update({
