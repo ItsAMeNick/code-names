@@ -365,7 +365,7 @@ class Game extends Component {
                             style = BLUE_CARD;
                         }
                         return <td id={r*4 + c} style={style} key={"i"+(r*5 + c)}>
-                            <strong>{((this.props.round.guesses[r*5 + c]) ? titleCase(this.props.round.words[r*5 + c]) : "***")}</strong>
+                            <strong>{((this.props.round.guesses[r*5 + c]) ? "" : titleCase(this.props.round.words[r*5 + c]))}</strong>
                         </td>
                     })}
                 </tr>
