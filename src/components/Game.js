@@ -436,9 +436,7 @@ class Game extends Component {
                                             break;
                                         }
                                     }
-                                    console.log(data.guesses)
                                     if (data.guesses - 1 < 0) {
-                                        console.log("No guesses!")
                                         newTurn = (this.props.player_team === "blue") ? "R" : "B";
                                     }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
