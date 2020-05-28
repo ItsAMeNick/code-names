@@ -98,9 +98,11 @@ class Game extends Component {
                         <Col>
                             <Button onClick={() => this.startGame()}>Start Game</Button>
                         </Col>
-                        <Col>
-                            <Button variant={this.props.player_team === "red" ? "primary" : "danger"} onClick={() => this.switchTeams()}>Switch Teams</Button>
-                        </Col>
+                        {this.props.player_team ?
+                            <Col>
+                                <Button variant={this.props.player_team === "red" ? "primary" : "danger"} onClick={() => this.switchTeams()}>Switch Teams</Button>
+                            </Col>
+                        :null}
                         <Col>
                             <Button onClick={() => {
                                 //End Game
@@ -110,9 +112,11 @@ class Game extends Component {
                     </Row>)
                 } else {
                     return(<Row>
-                        <Col>
-                            <Button onClick={() => this.switchTeams()}>Switch Teams</Button>
-                        </Col>
+                        {this.props.player_team ?
+                            <Col>
+                                <Button variant={this.props.player_team === "red" ? "primary" : "danger"} onClick={() => this.switchTeams()}>Switch Teams</Button>
+                            </Col>
+                        :null}
                         <Col>
                             <Button onClick={() => {
                                 firestore.collection("sessions").doc(this.props.session.db_id).update({
@@ -419,7 +423,7 @@ class Game extends Component {
                         <Col>
                             <Alert variant="dark">{(this.props.turn==="R" ? "Red":"Blue")+" team has a Bonus Guess!"}</Alert>
                         </Col>
-                        {((this.props.player_team === "red" && this.props.turn === "R") || (this.props.player_team === "blue" && this.props.turn === "B")) ?
+                        {(((this.props.player_team === "red" && this.props.turn === "R") || (this.props.player_team === "blue" && this.props.turn === "B")) && !((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name))) ?
                             <Col>
                                 <Button onClick={()=> {
                                     let newTurn = (this.props.player_team === "blue") ? "R" : "B";
