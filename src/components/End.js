@@ -92,26 +92,27 @@ class End extends Component {
                     </Alert>
                 </Col>
             </Row>
-            <Row>
+            <Row style={{height: "20vh"}}>
                 {this.props.player_team === "red" ?
                     <Col>
                         {((!(this.props.round.id % 2) && (this.props.score.red > this.props.score.blue)) || ((this.props.round.id % 2) && (this.props.score.red >= this.props.score.blue))) ?
-                            <Image src={win_red} style={{width: "100%"}}/>
+                            <Image src={win_red} style={{height: "20vh"}}/>
                         :
-                            <Image src={lose_red} style={{width: "100%"}}/>
+                            <Image src={lose_red} style={{height: "20vh"}}/>
                         }
                     </Col>
                 :
                 <Col>
                     {((!(this.props.round.id % 2) && (this.props.score.red > this.props.score.blue)) || ((this.props.round.id % 2) && (this.props.score.red >= this.props.score.blue))) ?
-                        <Image src={lose_blue} style={{width: "100%"}}/>
+                        <Image src={lose_blue} style={{height: "20vh"}}/>
                     :
-                        <Image src={win_blue} style={{width: "100%"}}/>
+                        <Image src={win_blue} style={{height: "20vh"}}/>
                     }
                 </Col>
                 }
             </Row>
-            <Row key={"scores"}>
+            <br/>
+            <Row key={"board"}>
                 <Col>
                     <Table bordered>
                         <tbody>
