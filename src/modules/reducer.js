@@ -38,21 +38,27 @@ const codeNamesReducer = (state = initialState, action) => {
         return state;
     }
 
-    case "load_wordlist": {
-        console.log(state);
-        let file = "";
-        let words = file.split("\n").map(item => item.toLowerCase());
-        console.log(words);
-        firestore.collection("words").doc("QU47JPZITi8eX2f1Q9JJ").update({
-            words: words
-        })
-        return state;
-    }
+    // case "load_wordlist": {
+    //     console.log(state);
+    //     let file = "";
+    //     let words = file.split("\n").map(item => item.toLowerCase());
+    //     console.log(words);
+    //     firestore.collection("words").doc("QU47JPZITi8eX2f1Q9JJ").update({
+    //         words: words
+    //     })
+    //     return state;
+    // }
 
     case "set_words": {
         let newState = _.cloneDeep(state);
         newState.words = action.payload;
         newState.db_updated = true;
+        return newState;
+    }
+
+    case "set_version": {
+        let newState = _.cloneDeep(state);
+        newState.version = action.payload;
         return newState;
     }
 
@@ -76,6 +82,7 @@ const codeNamesReducer = (state = initialState, action) => {
 
     case "update_game": {
         let newState = _.cloneDeep(state);
+        newState.version = action.payload.version;
         newState.stage = action.payload.stage;
         newState.players = action.payload.players;
         newState.round = action.payload.round;

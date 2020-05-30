@@ -11,6 +11,7 @@ import Col from "react-bootstrap/Col";
 import ListGroup from "react-bootstrap/ListGroup";
 import Alert from "react-bootstrap/Alert";
 import Table from "react-bootstrap/Table";
+import Form from "react-bootstrap/Form";
 
 import End from "./End.js";
 
@@ -227,6 +228,7 @@ class Game extends Component {
         }
         // console.log(board)
         firestore.collection("sessions").doc(this.props.session.db_id).update({
+            version: this.props.version,
             stage: "game",
             "round.words": words,
             "round.board": board,
@@ -256,10 +258,32 @@ class Game extends Component {
         }
     }
 
+    getGameVersions() {
+        let versions = [];
+        for (let l in this.props.words) {
+            versions.push(<option key={l} label={titleCase(l)} value={l}/>)
+        }
+        return versions;
+    }
+
     lobby() {
         let lobby = [];
         if (this.props.player_team) {
-            lobby.push(<Alert variant="info" key="code">{"Room Code: "+this.props.session.key}</Alert>)
+            lobby.push(<Alert variant="info" key="code">{"Room Code: "+this.props.session.key}</Alert>);
+            if (this.props.players[0] === this.props.player_name) {
+                lobby.push(<Row key="mode">
+                    <Col>
+                        <Form.Label>
+                            <Alert variant="dark">Game Version:</Alert>
+                        </Form.Label>
+                    </Col>
+                    <Col>
+                        <Form.Control as="select" value={this.props.version} onChange={(e) => this.props.changeVersion(e.target.value)}>
+                            {this.getGameVersions()}
+                        </Form.Control>
+                    </Col>
+                </Row>);
+            }
             for (let r in this.props.teams.red) {
                 lobby.push(<ListGroup.Item  variant="danger" key={this.props.teams.red[r]}>
                     {this.props.teams.red[r]}
@@ -627,6 +651,10 @@ const mapDispatchToProps = dispatch => ({
     clearGame: () => dispatch({
         type: "clear_game",
         payload: null
+    }),
+    changeVersion: (version) => dispatch({
+        type: "set_version",
+        payload: version
     }),
     setTeam: (team) => dispatch({
         type: "set_team",
