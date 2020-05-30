@@ -28,6 +28,7 @@ class Host extends Component {
                 teams: {red: [], blue: []},
                 key: key,
                 stage: "lobby",
+                version: "classic",
                 round: {
                     id: 0,
                     words: [],
