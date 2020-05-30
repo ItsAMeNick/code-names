@@ -43,7 +43,7 @@ const codeNamesReducer = (state = initialState, action) => {
         let file = "";
         let words = file.split("\n").map(item => item.toLowerCase());
         console.log(words);
-        firestore.collection("words").doc("WuyqyBh1ecLt16urvTS2").update({
+        firestore.collection("words").doc("QU47JPZITi8eX2f1Q9JJ").update({
             words: words
         })
         return state;

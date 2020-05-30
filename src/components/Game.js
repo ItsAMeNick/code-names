@@ -522,6 +522,7 @@ class Game extends Component {
                                             if (this.props.player_team === "blue") {
                                                 newTurn = "R";
                                                 data.guesses = 0;
+                                                data.bonus = false;
                                             }
                                             break;
                                         }
@@ -530,16 +531,17 @@ class Game extends Component {
                                             if (this.props.player_team === "red") {
                                                 newTurn = "B";
                                                 data.guesses = 0;
+                                                data.bonus = false;
                                             }
                                             break;
                                         }
                                         case "C": {
+                                            data.guesses = 0;
+                                            data.bonus = false;
                                             if (data.turn === "R") {
                                                 newTurn = "B";
-                                                data.guesses = 0;
                                             } else {
                                                 newTurn = "R";
-                                                data.guesses = 0;
                                             }
                                             break;
                                         }

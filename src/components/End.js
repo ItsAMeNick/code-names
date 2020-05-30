@@ -95,7 +95,7 @@ class End extends Component {
             <Row>
                 {this.props.player_team === "red" ?
                     <Col>
-                        {this.props.score.red >= this.props.score.blue ?
+                        {((!(this.props.round.id % 2) && (this.props.score.red > this.props.score.blue)) || ((this.props.round.id % 2) && (this.props.score.red >= this.props.score.blue))) ?
                             <Image src={win_red} style={{width: "100%"}}/>
                         :
                             <Image src={lose_red} style={{width: "100%"}}/>
@@ -103,10 +103,10 @@ class End extends Component {
                     </Col>
                 :
                 <Col>
-                    {this.props.score.blue >= this.props.score.red ?
-                        <Image src={win_blue} style={{width: "100%"}}/>
-                    :
+                    {((!(this.props.round.id % 2) && (this.props.score.red > this.props.score.blue)) || ((this.props.round.id % 2) && (this.props.score.red >= this.props.score.blue))) ?
                         <Image src={lose_blue} style={{width: "100%"}}/>
+                    :
+                        <Image src={win_blue} style={{width: "100%"}}/>
                     }
                 </Col>
                 }
