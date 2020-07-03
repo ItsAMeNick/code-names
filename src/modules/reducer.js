@@ -17,6 +17,7 @@ const initialState = {
         db_id: ""
     },
     stage: "",
+    board_size: 5,
     round: {
         id: 0,
         words: "",
@@ -38,16 +39,14 @@ const codeNamesReducer = (state = initialState, action) => {
         return state;
     }
 
-    // case "load_wordlist": {
-    //     console.log(state);
-    //     let file = "";
-    //     let words = file.split("\n").map(item => item.toLowerCase());
-    //     console.log(words);
-    //     firestore.collection("words").doc("QU47JPZITi8eX2f1Q9JJ").update({
-    //         words: words
-    //     })
-    //     return state;
-    // }
+    case "load_wordlist": {
+        let file = "";
+        let words = file.split("\n").map(item => item.toLowerCase());
+        firestore.collection("words").doc("QU47JPZITi8eX2f1Q9JJ").update({
+            words: words
+        })
+        return state;
+    }
 
     case "set_words": {
         let newState = _.cloneDeep(state);
@@ -59,6 +58,12 @@ const codeNamesReducer = (state = initialState, action) => {
     case "set_version": {
         let newState = _.cloneDeep(state);
         newState.version = action.payload;
+        return newState;
+    }
+
+    case "set_board_size": {
+        let newState = _.cloneDeep(state);
+        newState.board_size = action.payload;
         return newState;
     }
 

@@ -200,27 +200,27 @@ class Game extends Component {
 
         let words = [];
         // console.log(this.props.words[this.props.version])
-        while (words.length < 25) {
+        while (words.length < (this.props.board_size*this.props.board_size)) {
             let word = this.props.words[this.props.version][Math.floor(Math.random()*this.props.words[this.props.version].length)];
             if (!words.includes(word)) {
                 words.push(word)
             }
         }
         // console.log(words);
-        let board = Array(25).fill("C");
+        let board = Array(this.props.board_size*this.props.board_size).fill("C");
         let used = []
-        let spot = Math.floor(Math.random()*25);
+        let spot = Math.floor(Math.random()*(this.props.board_size*this.props.board_size));
         board[spot] = "A";
         used.push(spot);
         while (used.length < 10) {
-            spot = Math.floor(Math.random()*25);
+            spot = Math.floor(Math.random()*(this.props.board_size*this.props.board_size));
             if (!used.includes(spot)) {
                 used.push(spot);
                 board[spot] = (this.props.round.id % 2) ? "B" : "R";
             }
         }
         while (used.length < 18) {
-            spot = Math.floor(Math.random()*25);
+            spot = Math.floor(Math.random()*(this.props.board_size*this.props.board_size));
             if (!used.includes(spot)) {
                 used.push(spot);
                 board[spot] = (this.props.round.id % 2) ? "R" : "B";
@@ -232,7 +232,7 @@ class Game extends Component {
             stage: "game",
             "round.words": words,
             "round.board": board,
-            "round.guesses": Array(25).fill(""),
+            "round.guesses": Array((this.props.board_size*this.props.board_size)).fill(""),
             turn: (this.props.round.id % 2) ? "B" : "R",
             guesses: 0,
             score: {red: 0, blue: 0},
@@ -274,12 +274,19 @@ class Game extends Component {
                 lobby.push(<Row key="mode">
                     <Col>
                         <Form.Label>
-                            <Alert variant="dark">Game Version:</Alert>
+                            <Alert variant="dark">Game Settings:</Alert>
                         </Form.Label>
                     </Col>
                     <Col>
                         <Form.Control as="select" value={this.props.version} onChange={(e) => this.props.changeVersion(e.target.value)}>
                             {this.getGameVersions()}
+                        </Form.Control>
+                    </Col>
+                    <Col>
+                        <Form.Control as="select" value={this.props.board_size} onChange={(e) => this.props.changeSize(e.target.value)}>
+                            <option label="5x5" value={5}/>
+                            <option label="6x6" value={6}/>
+                            <option label="7x7" value={7}/>
                         </Form.Control>
                     </Col>
                 </Row>);
@@ -335,12 +342,12 @@ class Game extends Component {
         game.push(<Row key={"scores"}>
             <Col>
                 <Alert variant="dark">
-                    {"Red Score: " + this.props.score.red}
+                    {"Red Score: " + this.props.score.red + "/" + (!(this.props.round.id % 2) ? 9 : 8)}
                 </Alert>
             </Col>
             <Col>
                 <Alert variant="dark">
-                    {"Blue Score: " + this.props.score.blue}
+                    {"Blue Score: " + this.props.score.blue + "/" + ((this.props.round.id % 2) ? 9 : 8)}
                 </Alert>
             </Col>
         </Row>);
@@ -480,9 +487,13 @@ class Game extends Component {
         let rows = []
         //if codemaster
         if ((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) {
-            for (let r in [0,1,2,3,4]) {
+            for (let r = 0; r < this.props.board_size; r++) {
+                let numbers = [];
+                for (let i = 0; i < this.props.board_size; i++) {
+                    numbers.push(i);
+                }
                 let row = <tr key={"r"+r}>
-                    {[0,1,2,3,4].map((c) => {
+                    {numbers.map((c) => {
                         let style = CIV_CARD;
                         if (this.props.round.board[r*5 + c] === "A") {
                             style = BLACK_CARD;
@@ -584,7 +595,7 @@ class Game extends Component {
                                     }
                                     if (data.score.red >= (!(this.props.round.id % 2) ? 9 : 8) || data.score.blue >= ((this.props.round.id % 2) ? 9 : 8)) {
                                         data.stage = "results";
-                                        data.round.id = data.round.id + 1
+                                        data.round.id = data.round.id + 1;
                                     }
                                     firestore.collection("sessions").doc(this.props.session.db_id).update({
                                         guesses: data.guesses,
@@ -641,6 +652,7 @@ const mapStateToProps = state => ({
     guesses: state.guesses,
     score: state.score,
     bonus: state.bonus,
+    board_size: state.board_size,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -655,6 +667,10 @@ const mapDispatchToProps = dispatch => ({
     changeVersion: (version) => dispatch({
         type: "set_version",
         payload: version
+    }),
+    changeSize: (board_size) => dispatch({
+        type: "set_board_size",
+        payload: board_size
     }),
     setTeam: (team) => dispatch({
         type: "set_team",

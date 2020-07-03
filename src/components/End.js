@@ -81,21 +81,23 @@ class End extends Component {
                         {(((this.props.teams.red[this.props.round.id % this.props.teams.red.length] === this.props.player_name) || (this.props.teams.blue[this.props.round.id % this.props.teams.blue.length] === this.props.player_name)) ? "Codemaster " : "Agent ") + titleCase(this.props.player_name)}
                     </Alert>
                 </Col>
-                <Col>
-                    <Alert variant="dark">
-                        {"Red Score: " + this.props.score.red}
-                    </Alert>
-                </Col>
-                <Col>
-                    <Alert variant="dark">
-                        {"Blue Score: " + this.props.score.blue}
-                    </Alert>
-                </Col>
+{
+//                 <Col>
+//                     <Alert variant="dark">
+//                         {"Red Score: " + this.props.score.red}
+//                     </Alert>
+//                 </Col>
+//                 <Col>
+//                     <Alert variant="dark">
+//                         {"Blue Score: " + this.props.score.blue}
+//                     </Alert>
+//                 </Col>
+}
             </Row>
             <Row style={{height: "20vh"}}>
                 {this.props.player_team === "red" ?
                     <Col>
-                        {((!(this.props.round.id % 2) && (this.props.score.red > this.props.score.blue)) || ((this.props.round.id % 2) && (this.props.score.red >= this.props.score.blue))) ?
+                        {(((this.props.round.id % 2) && this.props.score.red === 9) || (!(this.props.round.id % 2) && this.props.score.red === 8) || (this.props.score.blue === -1)) ?
                             <Image src={win_red} style={{height: "20vh"}}/>
                         :
                             <Image src={lose_red} style={{height: "20vh"}}/>
@@ -103,10 +105,10 @@ class End extends Component {
                     </Col>
                 :
                 <Col>
-                    {((!(this.props.round.id % 2) && (this.props.score.red > this.props.score.blue)) || ((this.props.round.id % 2) && (this.props.score.red >= this.props.score.blue))) ?
-                        <Image src={lose_blue} style={{height: "20vh"}}/>
-                    :
+                    {((!(this.props.round.id % 2) && this.props.score.blue === 9) || ((this.props.round.id % 2) && this.props.score.blue === 8) || (this.props.score.red === -1)) ?
                         <Image src={win_blue} style={{height: "20vh"}}/>
+                    :
+                        <Image src={lose_blue} style={{height: "20vh"}}/>
                     }
                 </Col>
                 }
